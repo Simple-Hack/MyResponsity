@@ -1,72 +1,79 @@
 
 
-def check(mid,k,work:list)->bool:
-    count=0
-    s=0
+def check(mid,k:int ,work:list)->bool:
+    mid_staff_number=0
+    real_staff_number=k
+    #工作时间的遍历
     i=len(work)-1
+    work_time_count=0
+
     while i >=0:
-        if (count+work[i])<=mid:
-            count+=work[i]
+        if (work_time_count+work[i]) <= mid:
+            if work_time_count==0:
+                mid_staff_number+=1
+            work_time_count+=work[i]
             i-=1
-            continue
         else:
-            count=0
-            count+=work[i]
-            s+=1
-            i-=1
-            continue
-    if s< k-1:
+            if work_time_count==0:
+                return False
+            work_time_count=0
+    if mid_staff_number <= k:
         return True
     return False
     
 def main():
     left=0
-    right=12
+    right=17
     ans=0
     t,k=map(int,input().split())
     work=[int(i) for i in input().split()]
 
     while left < right:
-        mid=(left+right)//2
+        mid=(left+right) // 2
         if check(mid,k,work):
             right=mid
             ans=mid
         else:
             left=mid+1
+
     ans_list=[[0,0] for _ in range(k)]
     #员工代号
-    count=k-1
-    su=0
-    a=0
+    worker_id=k-1
+    sum_work_time=0
+
     for i in range(t-1,-1,-1):
-        a=i
-        #员工没有分配完，同时每个员工的配额小于ans
-        if count >=0 and (su+work[i])<=ans:
-            #第一次分配的话，结束置此刻的任务代号,结果要＋1
-            if su==0:
-                ans_list[count][1]=i+1
-            su+=work[i]
-        #如果有一个配额即将大于，给下一个员工分配，
-        elif (su+work[i])>ans:
-            ans_list[count][0]=i+1+1
-            count-=1
-            su=0
-            #如果上一个员工分不了，同时下一个也分不了，那么就是数据的问题.
-            if (su+work[i])>ans:
-                raise ValueError
-            else:
-                su+=work[i]
-                ans_list[count][1]=i+1
-    ans_list[count][0]=a+1
+        #第一个任务必须特殊处理
+        if i ==0:
+            if (sum_work_time+work[i])<=ans:
+                if sum_work_time==0:
+                    ans_list[worker_id][0]=i+1
+                    ans_list[worker_id][1]=i+1
+                else:
+                    ans_list[worker_id][0]=i+1
+        #不是第一个的   话正常相加即可
+        if (sum_work_time+work[i])<= ans:
+            if sum_work_time==0:
+                ans_list[worker_id][1]=i+1
+            sum_work_time+=work[i]
+            if sum_work_time==ans:
+                ans_list[worker_id][0]=i+1
+                worker_id-=1
+                sum_work_time=0
+                continue
+        else:
+            sum_work_time=0
+            sum_work_time+=work[i]
+            ans_list[worker_id][0]=i+1+1
+            worker_id-=1
+            ans_list[worker_id][1]=i+1
+
+
     for i in range(k):
         start, end = ans_list[i]
         print(f"{start} {end}")
 
-
     pass
 
-    for i in range(0,4,-1):
-        print(i)
 
 if __name__ == '__main__':
     main();
